@@ -31,8 +31,8 @@ class trans():
 	def __init__(self):
 		pass
 	def generateKeys(self):
-		self.p=11
-		self.q=17
+		self.p=gost.generate()
+		self.q=gost.generate()
 
 		phi=(self.p-1)*(self.q-1)
 		e = random.randrange(1, phi)
@@ -47,14 +47,17 @@ class trans():
 
 	def sign(self,keys):
 		for i in range(len(self.Zs)):
-			if ((self.Zs[i]*keys[i])%(self.p*self.q))%2!=0:
-				return ERR('Cheater!')	
+
+			if (self.Zs[i]*keys[i])%(self.p*self.q)%3==0:
+				return ERR('Cheater!')
+				
 		return OK(pow(self.element_to_sign,self.e,self.p*self.q))
 
 	def get_keys_info(self):
 		return {'secret':(self.e,self.p*self.q),'open':(self.d,self.p*self.q)}
 
 	def validate_sign(self,x,sign):
+		print(pow(x,self.e,(self.p*self.q)))
 		if pow(x,self.e,(self.p*self.q))==sign:
 			return True
 		else:
@@ -62,9 +65,12 @@ class trans():
 
 	def get_Zs(self, Zs):
 		self.Zs=Zs
+		input()
 		index=random.randint(0,len(Zs)-1)
 		self.element_to_sign=self.Zs.pop(index)
+		print ('e',self.element_to_sign)
 		return index
+
 def blind_sign():
 	x=879749327239
 	print('text',x)
@@ -88,13 +94,11 @@ def blinded_sign():
 	T=trans()
 	A.set_keys(T.generateKeys())#p,q
 	Zs=[]	#list of encrypted msgs
-	msgs=[2**i for i in range(2,10)]
-	#msgs[4]=3
+	msgs=[2**i for i in range(0,10)]
 	for m in msgs:
 		A.set_text(m)
 
 		Zs.append(A.encrypt())
-
 	k=T.get_Zs(list(map((lambda x:x[0]),Zs)))	#T choose one element to sign
 
 	key=Zs.pop(k)[1]#k of choosen element

@@ -76,7 +76,7 @@ def blinded_sign():
 	print (T.get_keys_info())
 	print ('Preparing texts')
 	msgs=[2**i for i in range(0,100)]
-	msgs[4]=3
+	#msgs[4]=3 way to check sign's work - replace one of texts with evil one 
 	Zs=[]	#list of encrypted msgs (z,k)
 	for m in msgs:
 		print(m)

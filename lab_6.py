@@ -57,7 +57,6 @@ class trans():
 		return {'secret':(self.e,self.p*self.q),'open':(self.d,self.p*self.q)}
 
 	def validate_sign(self,x,sign):
-		print(pow(x,self.e,(self.p*self.q)))
 		if pow(x,self.e,(self.p*self.q))==sign:
 			return True
 		else:
@@ -65,51 +64,36 @@ class trans():
 
 	def get_Zs(self, Zs):
 		self.Zs=Zs
-		input()
 		index=random.randint(0,len(Zs)-1)
 		self.element_to_sign=self.Zs.pop(index)
-		print ('e',self.element_to_sign)
 		return index
-
-def blind_sign():
-	x=879749327239
-	print('text',x)
-	A=owner()
-	A.set_text(x)
-	T=trans()
-	A.set_keys(T.generateKeys())
-	print(T.get_keys_info())
-	z=A.encrypt()
-	print(z)
-	s=T.sign(z)
-	y=A.decrypt(s)
-	print ('sign',y)
-	###############
-	print('sign is ',T.validate_sign(x,y))
-	print('---------------')
 
 
 def blinded_sign():
 	A=owner()
 	T=trans()
-	A.set_keys(T.generateKeys())#p,q
-	Zs=[]	#list of encrypted msgs
-	msgs=[2**i for i in range(0,10)]
+	A.set_keys(T.generateKeys())#p,q,e
+	print (T.get_keys_info())
+	print ('Preparing texts')
+	msgs=[2**i for i in range(0,100)]
+	msgs[4]=3
+	Zs=[]	#list of encrypted msgs (z,k)
 	for m in msgs:
+		print(m)
 		A.set_text(m)
-
 		Zs.append(A.encrypt())
 	k=T.get_Zs(list(map((lambda x:x[0]),Zs)))	#T choose one element to sign
-
+	print('Signing will for ',msgs[k])
+	x=msgs[k]
 	key=Zs.pop(k)[1]#k of choosen element
-	keys=[]
+	dec_keys=[]
 	for i in range(len(Zs)):
-		keys.append(A.get_dec_key(Zs[i][1]))# z'=k**(-d) z'*z=x
+		dec_keys.append(A.get_dec_key(Zs[i][1]))# z'=k**(-d) z'*z=x
 
-	sign=T.sign(keys)
+	sign=T.sign(dec_keys)
 	if sign['status']:
 		y=A.decrypt(key,sign['value'])
-		print('sign is ',T.validate_sign(2**k,y))
+		print('sign is ',T.validate_sign(x,y))
 	else:
 		print(sign['value'])
 	

@@ -59,4 +59,3 @@ def generate():
 		if num%4==3:
 			return num
 			
-print(generate())
